@@ -37,6 +37,8 @@ export default class Parser {
     let buildingAttributeName = false;
     // Represents whether we're building the opening or closing tag.
     let buildingClosingTag = false;
+    // Represents whether we're building a code tag. Ignore bbcode inside the code tag.
+    let buildingCode = false;
     // Represents whether we're in a quote. In that case, ignore all spaces.
     let quoted = false;
     // Represents the name of the current tag we're building.
@@ -91,7 +93,7 @@ export default class Parser {
           } else if ((["]", " ", "="].includes(nextCharacter))){
             // We found a character that signifies the end of the tag name.
               // First, we determine if it is a valid tag name.
-              if (this.supportedTagNames.includes(this.caseSensitive ? currentTagName : currentTagName.toLowerCase())) {
+              if (this.supportedTagNames.includes(this.caseSensitive ? currentTagName : currentTagName.toLowerCase()) && (!buildingCode || currentTagName === "code")) {
                 // The tag name is valid.
                 if (nextCharacter === "]"){
                   if (currentTagName === "*"){
@@ -127,6 +129,9 @@ export default class Parser {
                     currentStack.push(currentTag);
                     buildingTagName = false;
                     buildingText = true;
+                    if (currentTagName.toLowerCase() === "code"){
+                      buildingCode = true;
+                    }
                     currentTagName = "";
                   }
                 } else if (nextCharacter === "="){
@@ -143,7 +148,7 @@ export default class Parser {
               // We treat it as text.
               buildingText = true;
               buildingTagName = false;
-              currentText += "[" + currentTagName;
+              currentText += (buildingClosingTag ? "[/" : "[") + currentTagName + nextCharacter;
             }
           } else {
             // We're still building the tag's name.

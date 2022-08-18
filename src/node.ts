@@ -42,7 +42,15 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     return node;
   }
 
-  addChild(child: Node): void {
+  addChild(child: BaseNode): void {
+    if (child instanceof TextNode){
+      const previousChild = this.children[this.children.length - 1];
+      if (previousChild instanceof TextNode){
+        // We flatten the text nodes.
+        previousChild.text += child.text;
+        return;
+      }
+    }
     this.children.push(child.clone());
   }
 
@@ -99,7 +107,15 @@ export class RootNode extends BaseNode implements ChildrenHolder {
     this.children = children;
   }
 
-  addChild(child: Node): void {
+  addChild(child: BaseNode): void {
+    if (child instanceof TextNode){
+      const previousChild = this.children[this.children.length - 1];
+      if (previousChild instanceof TextNode){
+        // We flatten the text nodes.
+        previousChild.text += child.text;
+        return;
+      }
+    }
     this.children.push(child.clone());
   }
 
