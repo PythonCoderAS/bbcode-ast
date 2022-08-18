@@ -9,7 +9,8 @@
     "test": "mocha --require ts-node/register tests/**/*.test.ts",
     "build": "tsc -b",
     "lint": "prettier --check . && eslint . --ext .ts",
-    "lint-fix": "prettier --write . && eslint . --ext .ts --fix"
+    "lint-fix": "prettier --write . && eslint . --ext .ts --fix",
+    "docs": "typedoc --out docs src/index.ts"
   },
   "repository": {
     "type": "git",
