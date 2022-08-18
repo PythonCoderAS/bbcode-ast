@@ -1,7 +1,7 @@
 {
-  "name": "<package-name>",
+  "name": "bbcode-ast",
   "version": "1.0.0",
-  "description": "<package-description>",
+  "description": "Generate an AST of a BBCode fragment.",
   "main": "dist/index.js",
   "type": "commonjs",
   "types": "dist/index.d.ts",
@@ -13,24 +13,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PythonCoderAS/<package-name>.git"
+    "url": "git+https://github.com/PythonCoderAS/bbcode-ast.git"
   },
   "keywords": [],
   "author": "PythonCoderAS",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/PythonCoderAS/<package-name>/issues"
+    "url": "https://github.com/PythonCoderAS/bbcode-ast/issues"
   },
-  "homepage": "https://github.com/PythonCoderAS/<package-name>#readme",
-  "dependencies": {
-  },
+  "homepage": "https://github.com/PythonCoderAS/bbcode-ast#readme",
   "devDependencies": {
     "@types/chai": "^4.3.3",
-    "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^9.1.1",
-    "@types/node": "^18.7.6",
     "chai": "^4.3.6",
-    "chai-as-promised": "^7.1.1",
     "eslint": "^8.22.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-pythoncoderas-combo": "^1.1.3",
