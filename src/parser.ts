@@ -66,6 +66,7 @@ export default class Parser {
             // We've already built some text. Add it as a text node.
             const textNode = new TextNode(currentText);
             currentStack[currentStack.length - 1].addChild(textNode);
+            currentText = "";
           }
         } else {
           // We're building text, and we found a character other than "[".
@@ -85,6 +86,8 @@ export default class Parser {
               const previousStackElement = currentStack[currentStack.length - 1];
               previousStackElement.addChild(lastStackElement);
             }
+          } else if (nextCharacter === "/" && !currentTagName) {
+            buildingClosingTag = true;
           } else if ((["]", " ", "="].includes(nextCharacter))){
             // We found a character that signifies the end of the tag name.
               // First, we determine if it is a valid tag name.
@@ -113,6 +116,10 @@ export default class Parser {
                       throw new Error(`Expected closing tag for '${currentTagName}', found '${lastElement.name}'.`);
                     } else {
                       currentStack[currentStack.length - 1].addChild(lastElement);
+                      buildingText = true;
+                      buildingClosingTag = false;
+                      buildingTagName = false;
+                      currentTagName = "";
                     }
                   } else {
                     // Simple tag, there are no attributes or values. We push a tag to the stack and continue.
