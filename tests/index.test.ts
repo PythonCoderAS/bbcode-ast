@@ -70,4 +70,50 @@ describe("bbcode-ast tests", () => {
     expect((((parsed.children[0] as Node).children[1] as ListItemNode).children[0] as TextNode).text).to.equal("Hello world!");
     expect(parsed.toString()).to.equal("[list][*]Hello world![*]Hello world![/list]");
   })
+
+  it("Should parse simple attributes", () => {
+    const parsed = defaultParser.parse("[color=red]Hello world![/color]")
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.children[0].name).to.equal("color");
+    expect((parsed.children[0] as Node).value).to.equal("red");
+    expect((parsed.children[0] as Node).children.length).to.equal(1);
+    expect((parsed.children[0] as Node).children[0].name).to.equal("TextNode");
+    expect(((parsed.children[0] as Node).children[0] as TextNode).text).to.equal("Hello world!");
+    expect(parsed.toString()).to.equal("[color=red]Hello world![/color]");
+  })
+
+  it("Should parse simple attributes with space and quotes", () => {
+    const parsed = defaultParser.parse('[spoiler="a spoiler"]Hello world![/spoiler]')
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.children[0].name).to.equal("spoiler");
+    expect((parsed.children[0] as Node).value).to.equal('"a spoiler"');
+    expect((parsed.children[0] as Node).children.length).to.equal(1);
+    expect((parsed.children[0] as Node).children[0].name).to.equal("TextNode");
+    expect(((parsed.children[0] as Node).children[0] as TextNode).text).to.equal("Hello world!");
+    expect(parsed.toString()).to.equal('[spoiler="a spoiler"]Hello world![/spoiler]');
+  })
+
+  it("Should parse complex attributes", () => {
+    const parsed = defaultParser.parse("[url=https://www.google.com][img align=right]https://i.imgur.com/oz0a7.jpg[/img][/url]")
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.children[0].name).to.equal("url");
+    expect((parsed.children[0] as Node).value).to.equal("https://www.google.com");
+    expect((parsed.children[0] as Node).children.length).to.equal(1);
+    expect((parsed.children[0] as Node).children[0].name).to.equal("img");
+    expect(((parsed.children[0] as Node).children[0] as Node).attributes).to.deep.equal({align: "right"});
+    expect((((parsed.children[0] as Node).children[0] as Node).children[0] as TextNode).text).to.equal("https://i.imgur.com/oz0a7.jpg");
+    expect(parsed.toString()).to.equal("[url=https://www.google.com][img align=right]https://i.imgur.com/oz0a7.jpg[/img][/url]");
+  })
+
+  it("Should parse complex attributes and quotes", () => {
+    const parsed = defaultParser.parse("[url=https://www.google.com][img align='right']https://i.imgur.com/oz0a7.jpg[/img][/url]")
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.children[0].name).to.equal("url");
+    expect((parsed.children[0] as Node).value).to.equal("https://www.google.com");
+    expect((parsed.children[0] as Node).children.length).to.equal(1);
+    expect((parsed.children[0] as Node).children[0].name).to.equal("img");
+    expect(((parsed.children[0] as Node).children[0] as Node).attributes).to.deep.equal({align: "'right'"});
+    expect((((parsed.children[0] as Node).children[0] as Node).children[0] as TextNode).text).to.equal("https://i.imgur.com/oz0a7.jpg");
+    expect(parsed.toString()).to.equal("[url=https://www.google.com][img align='right']https://i.imgur.com/oz0a7.jpg[/img][/url]");
+  })
 })

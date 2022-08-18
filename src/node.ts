@@ -34,6 +34,7 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     super();
     this.name = params.name;
     this.attributes = params.attributes || {};
+    this.value = params.value;
   }
 
   clone(): Node {
@@ -69,7 +70,7 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
       nodeString += `=${this.value}`;
     }
     Object.entries(this.attributes).forEach(([key, value]) => {
-      nodeString += ` ${key}="${value}"`;
+      nodeString += ` ${key}=${value}`;
     });
     nodeString += ']';
     this.children.forEach(child => {

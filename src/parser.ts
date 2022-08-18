@@ -234,7 +234,7 @@ export default class Parser {
         }
         if (Object.keys(currentTagAttributes).length !== 0) {
           Object.entries(currentTagAttributes).forEach(([key, value]) => {
-            tagText += ` ${key}="${value}"`;
+            tagText += ` ${key}=${value}`;
           });
         }
         if (buildingAttributeName){
