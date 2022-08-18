@@ -17,7 +17,7 @@ module.exports = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "dist"),
-    library: "bbcode-ast",
+    library: "bbcode_ast",
   },
   devtool: "source-map",
 };
