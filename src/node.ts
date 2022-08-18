@@ -25,8 +25,11 @@ export interface AttributeHolder {
 
 export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
   name: string;
+
   attributes: { [key: string]: string };
+
   children: BaseNode[] = [];
+
   // For simple parameterized values, like [x=y]...[/x]
   value?: string;
 
@@ -38,20 +41,25 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
   }
 
   clone(): Node {
-    const node = new Node({name: this.name, attributes: this.attributes, value: this.value});
-    node.children = this.children.map(child => child.clone());
+    const node = new Node({
+      name: this.name,
+      attributes: this.attributes,
+      value: this.value,
+    });
+    node.children = this.children.map((child) => child.clone());
     return node;
   }
 
   addChild(child: BaseNode): void {
-    if (child instanceof TextNode){
+    if (child instanceof TextNode) {
       const previousChild = this.children[this.children.length - 1];
-      if (previousChild instanceof TextNode){
+      if (previousChild instanceof TextNode) {
         // We flatten the text nodes.
         previousChild.text += child.text;
         return;
       }
     }
+
     this.children.push(child.clone());
   }
 
@@ -63,17 +71,17 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     this.attributes[key] = value;
   }
 
-
   toString(): string {
     let nodeString = `[${this.name}`;
-    if (this.value){
+    if (this.value) {
       nodeString += `=${this.value}`;
     }
+
     Object.entries(this.attributes).forEach(([key, value]) => {
       nodeString += ` ${key}=${value}`;
     });
-    nodeString += ']';
-    this.children.forEach(child => {
+    nodeString += "]";
+    this.children.forEach((child) => {
       nodeString += child.toString();
     });
     nodeString += `[/${this.name}]`;
@@ -83,7 +91,8 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
 
 export class TextNode extends BaseNode {
   text: string;
-  name: string = 'TextNode';
+
+  name = "TextNode";
 
   constructor(text: string) {
     super();
@@ -101,6 +110,7 @@ export class TextNode extends BaseNode {
 
 export class RootNode extends BaseNode implements ChildrenHolder {
   name = "RootNode";
+
   children: BaseNode[];
 
   constructor(children: BaseNode[] = []) {
@@ -109,23 +119,24 @@ export class RootNode extends BaseNode implements ChildrenHolder {
   }
 
   addChild(child: BaseNode): void {
-    if (child instanceof TextNode){
+    if (child instanceof TextNode) {
       const previousChild = this.children[this.children.length - 1];
-      if (previousChild instanceof TextNode){
+      if (previousChild instanceof TextNode) {
         // We flatten the text nodes.
         previousChild.text += child.text;
         return;
       }
     }
+
     this.children.push(child.clone());
   }
 
   clone(): RootNode {
-    return new RootNode(this.children.map(child => child.clone()));
+    return new RootNode(this.children.map((child) => child.clone()));
   }
 
   toString(): string {
-    return this.children.map(child => child.toString()).join('');
+    return this.children.map((child) => child.toString()).join("");
   }
 }
 
@@ -133,10 +144,10 @@ export class ListItemNode extends RootNode {
   name = "*";
 
   toString(): string {
-    return "[*]" + super.toString();
+    return `[*]${super.toString()}`;
   }
 
   clone(): ListItemNode {
-    return new ListItemNode(this.children.map(child => child.clone()));
+    return new ListItemNode(this.children.map((child) => child.clone()));
   }
 }
