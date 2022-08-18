@@ -1,12 +1,19 @@
-# typescript-project-template
+# bbcode-ast
 
-Template repo for new TypeScript projects.
+Generates an Abstract Syntax Tree (AST) from a chunk of BBCode.
 
-This repo assumes the following:
+## Installation
 
-- Source code lives in the `src` directory.
-- The main export is located in `src/index.ts`.
-- Tests live in the `test` directory.
-- Each test is name `<name>.test.ts`.
-- The `npm_token`, `app_id`, and `app_private_key` secrets are present in the repo.
-- The code will be a CommonJS module.
+```bash
+npm install --save bbcode-ast
+```
+
+## Usage
+
+You can either use the default parser or construct your own parser. Once you have a `Parser`, call the `parse` method on
+it.
+
+It will return the root node of the AST.
+
+You can navigate through the tree by accessing the `children` attribute of the root node and recursively inspecting
+the `children` of child nodes.

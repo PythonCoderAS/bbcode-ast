@@ -8,8 +8,14 @@ import {
 } from "./node";
 
 export default class Parser {
+  /**
+   * The list of supported tag names. Any tags that are not in this list will be treated like text.
+   */
   supportedTagNames: string[];
 
+  /**
+   * Whether the parser should be case-sensitive or not regarding tag names and {@link supportedTagNames}.
+   */
   caseSensitive: boolean;
 
   constructor(supportedTagNames: string[], caseSensitive?: boolean) {

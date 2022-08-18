@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import defaultParser, { ListItemNode, Node, TextNode } from "../src/index";
+import { Parser } from "../src";
 
 describe("bbcode-ast tests", () => {
   it("Should parse tag-free text", () => {
@@ -217,5 +218,19 @@ Basically, wherever user-entered text is rendered with BBCode, you want to load 
     const parsed = defaultParser.parse(text);
     expect(parsed.children.length).to.equal(2);
     expect(parsed.toString() === text);
+  });
+
+  it("Custom parser", () => {
+    const parser = new Parser(["b"]);
+    const text = "[b][i]Hello world![/i][/b]";
+    const parsed = parser.parse(text);
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.children[0].name).to.equal("b");
+    expect((parsed.children[0] as Node).children.length).to.equal(1);
+    expect((parsed.children[0] as Node).children[0].name).to.equal("TextNode");
+    expect(
+      ((parsed.children[0] as Node).children[0] as TextNode).text
+    ).to.equal("[i]Hello world![/i]");
+    expect(parsed.toString()).to.equal(text);
   });
 });

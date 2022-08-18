@@ -1,36 +1,82 @@
+/**
+ * Parameters for constructing a new Node object.
+ */
 export interface NodeConstructorParams {
   name: string;
   attributes?: { [key: string]: string };
   value?: string;
 }
 
+/**
+ * The abstract base class for all nodes.
+ */
 export abstract class BaseNode {
+  /**
+   * The name of the node.
+   */
   abstract name: string;
 
+  /**
+   * Clones the code, creating a new deep-copied node.
+   */
   abstract clone(): BaseNode;
+
+  /**
+   * Converts the node into a textual representation of the node as BBCode.
+   */
   abstract toString(): string;
 }
 
+/**
+ * An interface for nodes that can hold children.
+ */
 export interface ChildrenHolder {
+  /**
+   * The children of the node.
+   */
   children: BaseNode[];
 
+  /**
+   * Adds a child to the node. If the node is a {@link TextNode}, attempts to flatten the node with an previous TextNode.
+   * @param child The child to add.
+   */
   addChild(child: BaseNode): void;
 }
 
+/**
+ * An interface for nodes that can hold attributes.
+ */
 export interface AttributeHolder {
+  /**
+   * The attributes of the node.
+   */
   attributes: { [key: string]: string };
 
+  /**
+   * Adds an attribute to the node.
+   * @param key The name of the attribute.
+   * @param value The value of the attribute.
+   */
   setAttribute(key: string, value: string): void;
 }
 
+/**
+ * A BBCode node. This represents a tag and it's children.
+ */
 export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
+  /**
+   * The name of the tag. If a Node is used to represent a `[b]` tag, `name` will be `b`.
+   */
   name: string;
 
   attributes: { [key: string]: string };
 
   children: BaseNode[] = [];
 
-  // For simple parameterized values, like [x=y]...[/x]
+  /**
+   * Stores the [simple parameterized value](https://www.bbcode.org/reference.php) of the tag.
+   * @example `[b=red]Hello World![/b]` -> `red`
+   */
   value?: string;
 
   constructor(params: NodeConstructorParams) {
@@ -63,6 +109,10 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     this.children.push(child.clone());
   }
 
+  /**
+   * Sets the value of the node.
+   * @param value
+   */
   setValue(value: string): void {
     this.value = value;
   }
@@ -89,7 +139,13 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
   }
 }
 
+/**
+ * A node that represents a chunk of text. This node is *not* a tag.
+ */
 export class TextNode extends BaseNode {
+  /**
+   * The text of the node.
+   */
   text: string;
 
   name = "TextNode";
@@ -108,6 +164,9 @@ export class TextNode extends BaseNode {
   }
 }
 
+/**
+ * The root node that represents the head of the AST. It only stores children.
+ */
 export class RootNode extends BaseNode implements ChildrenHolder {
   name = "RootNode";
 
@@ -135,11 +194,17 @@ export class RootNode extends BaseNode implements ChildrenHolder {
     return new RootNode(this.children.map((child) => child.clone()));
   }
 
+  /**
+   * The textual representation of the BBCode AST. It should return a string equivalent to the input to {@link Parser.parse}.
+   */
   toString(): string {
     return this.children.map((child) => child.toString()).join("");
   }
 }
 
+/**
+ * A node that represents a list item. It is similar to the root node.
+ */
 export class ListItemNode extends RootNode {
   name = "*";
 

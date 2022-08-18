@@ -21,5 +21,8 @@ const defaultTags = [
   "code",
   "quote",
 ];
+/**
+ * The default BBcode parser. Implements the tags used on the website [MyAnimeList](https://myanimelist.net/info.php?go=bbcode).
+ */
 const defaultParser = new Parser(defaultTags, false);
 export default defaultParser;
