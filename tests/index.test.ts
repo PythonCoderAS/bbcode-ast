@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import defaultParser, {Node, TextNode} from "../src/index";
+import defaultParser, {ListItemNode, Node, TextNode} from "../src/index";
 
 describe("bbcode-ast tests", () => {
   it("Should parse tag-free text", () => {
@@ -53,5 +53,21 @@ describe("bbcode-ast tests", () => {
     expect((parsed.children[0] as Node).children[0].name).to.equal("TextNode");
     expect(((parsed.children[0] as Node).children[0] as TextNode).text).to.equal("[b]Hello world![/b]");
     expect(parsed.toString()).to.equal("[code][b]Hello world![/b][/code]");
+  })
+
+  it("Should parse list tags", () => {
+    const parsed = defaultParser.parse("[list][*]Hello world![*]Hello world![/list]")
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.children[0].name).to.equal("list");
+    expect((parsed.children[0] as Node).children.length).to.equal(2);
+    expect((parsed.children[0] as Node).children[0].name).to.equal("*");
+    expect(((parsed.children[0] as Node).children[0] as ListItemNode).children.length).to.equal(1);
+    expect(((parsed.children[0] as Node).children[0] as ListItemNode).children[0].name).to.equal("TextNode");
+    expect((((parsed.children[0] as Node).children[0] as ListItemNode).children[0] as TextNode).text).to.equal("Hello world!");
+    expect((parsed.children[0] as Node).children[1].name).to.equal("*");
+    expect(((parsed.children[0] as Node).children[1] as ListItemNode).children.length).to.equal(1);
+    expect(((parsed.children[0] as Node).children[1] as ListItemNode).children[0].name).to.equal("TextNode");
+    expect((((parsed.children[0] as Node).children[1] as ListItemNode).children[0] as TextNode).text).to.equal("Hello world!");
+    expect(parsed.toString()).to.equal("[list][*]Hello world![*]Hello world![/list]");
   })
 })

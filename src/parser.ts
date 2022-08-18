@@ -79,15 +79,16 @@ export default class Parser {
         // We have to be building a tag or tag data.
         if (buildingTagName) {
           // We're building the tag's name.
-          if (nextCharacter === "*" && !currentTagName) {
+          if (nextCharacter === "*" && !currentTagName && !buildingClosingTag) {
             // This is a list node closing tag.
             const lastStackElement = currentStack[currentStack.length - 1];
-            if (lastStackElement instanceof ListItemNode) {
+            if (lastStackElement.name === "*") {
               // We finished the last list item.
               currentStack.pop();
               const previousStackElement = currentStack[currentStack.length - 1];
               previousStackElement.addChild(lastStackElement);
             }
+            currentTagName += nextCharacter;
           } else if (nextCharacter === "/" && !currentTagName) {
             buildingClosingTag = true;
           } else if ((["]", " ", "="].includes(nextCharacter))){
@@ -96,7 +97,7 @@ export default class Parser {
               if (this.supportedTagNames.includes(this.caseSensitive ? currentTagName : currentTagName.toLowerCase()) && (!buildingCode || currentTagName === "code")) {
                 // The tag name is valid.
                 if (nextCharacter === "]"){
-                  if (currentTagName === "*"){
+                  if (currentTagName === "*" && !buildingClosingTag) {
                     // This is a list node opening tag.
                     const listNode = new ListItemNode();
                     currentStack.push(listNode);
@@ -108,7 +109,7 @@ export default class Parser {
                     let lastElement = currentStack.pop()!;
                     if (currentTagName === "list"){
                       // List tag. If the last element is a list item, we need to add it to the previous element.
-                      if (lastElement instanceof ListItemNode){
+                      if (lastElement.name === "*"){
                         const previousElement = currentStack.pop()!;
                         previousElement.addChild(lastElement);
                         lastElement = previousElement;

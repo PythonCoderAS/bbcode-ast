@@ -129,9 +129,13 @@ export class RootNode extends BaseNode implements ChildrenHolder {
 }
 
 export class ListItemNode extends RootNode {
-  name = "ListItemNode";
+  name = "*";
 
   toString(): string {
     return "[*]" + super.toString();
+  }
+
+  clone(): ListItemNode {
+    return new ListItemNode(this.children.map(child => child.clone()));
   }
 }
