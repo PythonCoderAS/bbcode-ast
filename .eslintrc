@@ -5,6 +5,7 @@
     "@typescript-eslint/no-use-before-define": "off",
     "complexity": "off",
     "no-lonely-if": "off",
-    "max-depth": "off"
+    "max-depth": "off",
+    "no-plusplus": "off"
   }
 }

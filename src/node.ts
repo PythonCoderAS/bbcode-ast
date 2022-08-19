@@ -121,7 +121,7 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     this.attributes[key] = value;
   }
 
-  toString(): string {
+  makeOpeningTag(): string {
     let nodeString = `[${this.name}`;
     if (this.value) {
       nodeString += `=${this.value}`;
@@ -131,6 +131,11 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
       nodeString += ` ${key}=${value}`;
     });
     nodeString += "]";
+    return nodeString;
+  }
+
+  toString(): string {
+    let nodeString = this.makeOpeningTag();
     this.children.forEach((child) => {
       nodeString += child.toString();
     });

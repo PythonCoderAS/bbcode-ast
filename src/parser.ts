@@ -18,14 +18,29 @@ export default class Parser {
    */
   caseSensitive: boolean;
 
-  constructor(supportedTagNames: string[], caseSensitive?: boolean) {
+  /**
+   * Is more lenient about closing tags and mismatched tags. Instead of throwing an error, it will turn the entire node
+   * into a {@link TextNode} with the text of the entire node.
+   */
+  lenient: boolean;
+
+  constructor(
+    supportedTagNames: string[],
+    caseSensitive?: boolean,
+    lenient?: boolean
+  ) {
     this.supportedTagNames = supportedTagNames;
     this.caseSensitive = caseSensitive ?? false;
+    this.lenient = lenient ?? false;
     if (!this.caseSensitive) {
       this.supportedTagNames = this.supportedTagNames.map((tag) =>
         tag.toLowerCase()
       );
     }
+  }
+
+  private getNameRespectingSensitivity(name: string): string {
+    return this.caseSensitive ? name : name.toLowerCase();
   }
 
   /**
@@ -115,11 +130,9 @@ export default class Parser {
             // First, we determine if it is a valid tag name.
             if (
               this.supportedTagNames.includes(
-                this.caseSensitive
-                  ? currentTagName
-                  : currentTagName.toLowerCase()
+                this.getNameRespectingSensitivity(currentTagName)
               ) &&
-              (!buildingCode || currentTagName === "code")
+              (!buildingCode || currentTagName.toLowerCase() === "code")
             ) {
               // The tag name is valid.
               if (nextCharacter === "]") {
@@ -133,7 +146,7 @@ export default class Parser {
                 } else if (buildingClosingTag) {
                   // We're making the closing tag. Now that we've completed, we want to remove the last element from the stack and add it to the children of the element prior.
                   let lastElement = currentStack.pop()!;
-                  if (currentTagName === "list") {
+                  if (currentTagName.toLowerCase() === "list") {
                     // List tag. If the last element is a list item, we need to add it to the previous element.
                     if (lastElement.name === "*") {
                       const previousElement = currentStack.pop()!;
@@ -142,21 +155,48 @@ export default class Parser {
                     }
                   }
 
-                  if (lastElement.name !== currentTagName) {
-                    throw new Error(
-                      `Expected closing tag for '${currentTagName}', found '${lastElement.name}'.`
-                    );
-                  } else {
-                    currentStack[currentStack.length - 1].addChild(lastElement);
-                    buildingText = true;
-                    buildingClosingTag = false;
-                    buildingTagName = false;
-                    if (currentTagName === "code") {
-                      buildingCode = false;
+                  if (
+                    this.getNameRespectingSensitivity(lastElement.name) !==
+                    this.getNameRespectingSensitivity(currentTagName)
+                  ) {
+                    if (!this.lenient) {
+                      throw new Error(
+                        `Expected closing tag for '${currentTagName}', found '${lastElement.name}'.`
+                      );
+                    } else {
+                      // Let's just put the last element back in the stack so that we know how to chain it.
+                      currentStack.push(lastElement);
+                      // We could have multiple misplaced tags, so we need to go through the entire stack in reverse order until we find the matching node.
+                      for (let i = currentStack.length - 1; i >= 0; i--) {
+                        if (
+                          this.getNameRespectingSensitivity(
+                            currentStack[i].name
+                          ) ===
+                          this.getNameRespectingSensitivity(currentTagName)
+                        ) {
+                          lastElement = currentStack.pop()!;
+                          break;
+                        } else {
+                          const node = currentStack.pop()!;
+                          let nodeText = (node as Node).makeOpeningTag();
+                          node.children.forEach((child) => {
+                            nodeText += child.toString();
+                          });
+                          currentStack[i - 1].addChild(new TextNode(nodeText));
+                        }
+                      }
                     }
-
-                    currentTagName = "";
                   }
+
+                  currentStack[currentStack.length - 1].addChild(lastElement);
+                  buildingText = true;
+                  buildingClosingTag = false;
+                  buildingTagName = false;
+                  if (currentTagName.toLowerCase() === "code") {
+                    buildingCode = false;
+                  }
+
+                  currentTagName = "";
                 } else {
                   // Simple tag, there are no attributes or values. We push a tag to the stack and continue.
                   const currentTag = new Node({ name: currentTagName });
@@ -296,13 +336,24 @@ export default class Parser {
 
     if (currentStack.length > 1) {
       // We didn't close all tags.
-      throw new Error(
-        `Expected all tags to be closed. Found ${
-          currentStack.length - 1
-        } unclosed tags, most recently unclosed tag is "${
-          currentStack[currentStack.length - 1].name
-        }".`
-      );
+      if (!this.lenient) {
+        throw new Error(
+          `Expected all tags to be closed. Found ${
+            currentStack.length - 1
+          } unclosed tags, most recently unclosed tag is "${
+            currentStack[currentStack.length - 1].name
+          }".`
+        );
+      } else {
+        for (let i = currentStack.length - 1; i >= 1; i--) {
+          const node = currentStack.pop()!;
+          let nodeText = (node as Node).makeOpeningTag();
+          node.children.forEach((child) => {
+            nodeText += child.toString();
+          });
+          currentStack[i - 1].addChild(new TextNode(nodeText));
+        }
+      }
     }
 
     return rootNode;

@@ -233,4 +233,20 @@ Basically, wherever user-entered text is rendered with BBCode, you want to load 
     ).to.equal("[i]Hello world![/i]");
     expect(parsed.toString()).to.equal(text);
   });
+
+  it("Custom parser with lenient mode", () => {
+    const parser = new Parser(["b", "i", "s"], false, true);
+    const text = "[b][i][s]Hello world![/i][/b]";
+    const parsed = parser.parse(text);
+    expect(parsed.children.length).to.equal(1);
+    expect(parsed.toString()).to.equal(text);
+  });
+
+  it("Custom parser with lenient mode and no closing tags", () => {
+    const parser = new Parser(["b", "i", "s"], false, true);
+    const text = "[b]Test![/b][b][i][s]Hello world![b]Test![/b]";
+    const parsed = parser.parse(text);
+    expect(parsed.children.length).to.equal(2);
+    expect(parsed.toString()).to.equal(text);
+  });
 });
