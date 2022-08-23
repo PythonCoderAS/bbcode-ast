@@ -1,6 +1,7 @@
 import { expect } from "chai";
-import defaultParser, { ListItemNode, Node, TextNode } from "../src/index";
+
 import { Parser } from "../src";
+import defaultParser, { ListItemNode, Node, TextNode } from "../src/index";
 
 describe("bbcode-ast tests", () => {
   it("Should parse tag-free text", () => {
