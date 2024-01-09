@@ -5,7 +5,7 @@ import {
   Node,
   RootNode,
   TextNode,
-} from "./node";
+} from "./node.js";
 
 export default class Parser {
   /**
@@ -179,7 +179,7 @@ export default class Parser {
                         } else {
                           const node = currentStack.pop()!;
                           let nodeText = (node as Node).makeOpeningTag();
-                          node.children.forEach((child) => {
+                          node.children.forEach((child: BaseNode) => {
                             nodeText += child.toString();
                           });
                           currentStack[i - 1].addChild(new TextNode(nodeText));
@@ -348,7 +348,7 @@ export default class Parser {
         for (let i = currentStack.length - 1; i >= 1; i--) {
           const node = currentStack.pop()!;
           let nodeText = (node as Node).makeOpeningTag();
-          node.children.forEach((child) => {
+          node.children.forEach((child: BaseNode) => {
             nodeText += child.toString();
           });
           currentStack[i - 1].addChild(new TextNode(nodeText));

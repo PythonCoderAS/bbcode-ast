@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "module": "ES2020",
+    "module": "nodenext",
     "outDir": "dist",
     "strict": true,
     "target": "es2020",
     "sourceMap": true,
-    "moduleResolution": "Bundler"
+    "moduleResolution": "nodenext"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "*.config.*ts"]
 }

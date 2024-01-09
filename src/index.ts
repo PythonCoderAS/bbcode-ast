@@ -1,7 +1,7 @@
-import Parser from "./parser";
+import Parser from "./parser.js";
 
-export * from "./node";
-export { default as Parser } from "./parser";
+export * from "./node.js";
+export { default as Parser } from "./parser.js";
 
 const defaultTags = [
   "b",
