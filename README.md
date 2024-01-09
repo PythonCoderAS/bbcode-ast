@@ -14,7 +14,7 @@ npm install --save bbcode-ast
 
 ### Browser
 
-Load the library from https://cdn.jsdelivr.net/npm/bbcode-ast@1/dist/bundle.min.js.
+Load the library from https://cdn.jsdelivr.net/npm/bbcode-ast@2/dist/bundle.min.js.
 
 This will add a `bbcode_ast` variable to the `window` global. The default parser can be accessed through `bbcode_ast.default`.
 
