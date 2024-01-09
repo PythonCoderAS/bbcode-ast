@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "ts-mocha -p test.tsconfig.json .",
-    "build": "tsc -b && NODE_OPTIONS='--loader ts-node/esm' webpack && node fix-dist-output.js",
+    "build": "tsc -b && NODE_OPTIONS='--loader ts-node/esm' webpack && node scripts/fix-dist-output.js",
     "lint": "prettier --check . && eslint . --ext .ts",
     "lint-fix": "prettier --write . && eslint . --ext .ts --fix",
     "docs": "typedoc --out docs src/index.ts"

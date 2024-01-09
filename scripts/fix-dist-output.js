@@ -4,7 +4,8 @@ import { fileURLToPath } from "url";
 
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const distDir = resolve(__dirname, "dist");
+const parentDirName = resolve(__dirname, "..");
+const distDir = resolve(parentDirName, "dist");
 
 const files = await readdir(distDir);
 
