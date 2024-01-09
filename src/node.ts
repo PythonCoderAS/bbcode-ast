@@ -2,8 +2,26 @@
  * Parameters for constructing a new Node object.
  */
 export interface NodeConstructorParams {
+  /**
+   * The name of the node.
+   *
+   * Ref: {@link Node.name}
+   * @example `[b]Hello World![/b]` -> `b`
+   */
   name: string;
+  /**
+   * The attributes of the node.
+   *
+   * Ref: {@link Node.attributes}
+   * @example `[img width=100 height=100]https://example.com/image.png[/img]` -> `{ width: "100", height: "100" }`
+   */
   attributes?: { [key: string]: string };
+  /**
+   * The value of the node.
+   *
+   * Ref: {@link Node.value}
+   * @example `[color=red]Hello World![/color]` -> `red`
+   */
   value?: string;
 }
 
@@ -25,6 +43,14 @@ export abstract class BaseNode {
    * Converts the node into a textual representation of the node as BBCode.
    */
   abstract toString(): string;
+
+  /**
+   * Gets the textual representation of the node as BBCode.
+   * An alias for {@link BaseNode.toString}.
+   */
+  toBBCode(): string {
+    return this.toString();
+  }
 }
 
 /**
@@ -32,16 +58,24 @@ export abstract class BaseNode {
  */
 export interface ChildrenHolder {
   /**
-   * The children of the node.
+   * The children of the node. A node can have any number of children of all types.
    */
   children: BaseNode[];
 
   /**
-   * Adds a child to the node. If the node is a {@link TextNode}, attempts to flatten the node with an previous TextNode.
+   * Adds a child to the node. If the node is a {@link TextNode}, attempts to flatten the node with a previous TextNode.
    * @param child The child to add.
    */
   addChild(child: BaseNode): void;
 }
+
+/**
+ * A type for attributes.
+ *
+ * A BBCode attribute is a key-value pair, where the key is a string and the value is a string. A tag can have multiple attributes.
+ * @example `[img width=100 height=100]https://example.com/image.png[/img]` -> `{ width: "100", height: "100" }`
+ */
+export type AttributeType = { [key: string]: string };
 
 /**
  * An interface for nodes that can hold attributes.
@@ -49,13 +83,15 @@ export interface ChildrenHolder {
 export interface AttributeHolder {
   /**
    * The attributes of the node.
+   * This should be public, so it can be directly accessed and modified.
    */
-  attributes: { [key: string]: string };
+  attributes: AttributeType;
 
   /**
-   * Adds an attribute to the node.
-   * @param key The name of the attribute.
+   * Sets the attribute of the node.
+   * @param key The key of the attribute.
    * @param value The value of the attribute.
+   * @deprecated Use {@link AttributeHolder.attributes} instead.
    */
   setAttribute(key: string, value: string): void;
 }
@@ -65,16 +101,29 @@ export interface AttributeHolder {
  */
 export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
   /**
-   * The name of the tag. If a Node is used to represent a `[b]` tag, `name` will be `b`.
+   * The name of the tag.
+   *
+   * @example `[b]Hello World![/b]` -> `b`
    */
-  name: string;
+  public name: string;
 
-  attributes: { [key: string]: string };
+  /**
+   * The attributes of the tag.
+   *
+   * Ref: {@link AttributeType}
+   */
+  public attributes: AttributeType;
 
-  children: BaseNode[] = [];
+  /**
+   * The children of the tag.
+   *
+   * Ref: {@link ChildrenHolder.children}
+   */
+  public children: BaseNode[] = [];
 
   /**
    * Stores the [simple parameterized value](https://www.bbcode.org/reference.php) of the tag.
+   *
    * @example `[b=red]Hello World![/b]` -> `red`
    */
   value?: string;
@@ -111,7 +160,9 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
 
   /**
    * Sets the value of the node.
-   * @param value
+   *
+   * @param {string} value The value of the node.
+   * @deprecated Use {@link Node.value} instead.
    */
   setValue(value: string): void {
     this.value = value;
@@ -121,6 +172,10 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     this.attributes[key] = value;
   }
 
+  /**
+   * Makes the opening tag of the node. This will include the name, and all attributes.
+   * @returns The opening tag of the node.
+   */
   makeOpeningTag(): string {
     let nodeString = `[${this.name}`;
     if (this.value) {
@@ -153,8 +208,12 @@ export class TextNode extends BaseNode {
    */
   text: string;
 
-  name = "TextNode";
+  readonly name = "TextNode";
 
+  /**
+   * Create a new TextNode.
+   * @param {string} text The text of the node.
+   */
   constructor(text: string) {
     super();
     this.text = text;
@@ -177,6 +236,10 @@ export class RootNode extends BaseNode implements ChildrenHolder {
 
   children: BaseNode[];
 
+  /**
+   * Create a new RootNode.
+   * @param {BaseNode[]} children The children of the node.
+   */
   constructor(children: BaseNode[] = []) {
     super();
     this.children = children;

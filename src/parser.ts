@@ -238,7 +238,7 @@ export default class Parser {
             // We found the end of the tag.
             buildingValue = false;
             const currentTag = new Node({ name: currentTagName });
-            currentTag.setValue(currentTagValue);
+            currentTag.value = currentTagValue;
             currentStack.push(currentTag);
             buildingTagName = false;
             buildingText = true;
@@ -273,7 +273,7 @@ export default class Parser {
               attributes: currentTagAttributes,
             });
             if (currentTagValue) {
-              currentTag.setValue(currentTagValue);
+              currentTag.value = currentTagValue;
             }
 
             currentStack.push(currentTag);
