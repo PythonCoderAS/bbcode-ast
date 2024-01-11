@@ -20,6 +20,14 @@ const defaultTags = [
   "spoiler",
   "code",
   "quote",
+  "font",
+  "justify",
+  "sub",
+  "sup",
+  "pre",
+  "table",
+  "tr",
+  "td",
 ];
 /**
  * The default BBcode parser. Implements the tags used on the website [MyAnimeList](https://myanimelist.net/info.php?go=bbcode).

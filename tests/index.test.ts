@@ -254,4 +254,20 @@ Basically, wherever user-entered text is rendered with BBCode, you want to load 
     expect(parsed.children.length).to.equal(2);
     expect(parsed.toString()).to.equal(text);
   });
+
+  it("Simple Node Tree", () => {
+    const input = "[b][i]Hello World![/i][/b]";
+    const expectedOutput =
+      "RootNode {\n  Node [b] {\n    Node [i] {\n      TextNode {\n        Hello World!\n      }\n    }\n  }\n}";
+    const parsed = defaultParser.parse(input);
+    expect(parsed.nodeTree()).to.equal(expectedOutput);
+  });
+
+  it("Simple Node Tree With Indentation", () => {
+    const input = "[b][i]Hello World![/i][/b]";
+    const expectedOutput =
+      "RootNode {\n    Node [b] {\n        Node [i] {\n            TextNode {\n                Hello World!\n            }\n        }\n    }\n}";
+    const parsed = defaultParser.parse(input);
+    expect(parsed.nodeTree(4)).to.equal(expectedOutput);
+  });
 });

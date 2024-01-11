@@ -41,6 +41,8 @@ export abstract class BaseNode {
 
   /**
    * Converts the node into a textual representation of the node as BBCode.
+   * A node should return the exact same string as the input to {@link Parser.parse} provided `indented` is `false`.
+   * @returns The textual representation of the node as BBCode.
    */
   abstract toString(): string;
 
@@ -51,6 +53,45 @@ export abstract class BaseNode {
   toBBCode(): string {
     return this.toString();
   }
+
+  /**
+   * Converts the node into a tree-like overview of all children.
+   * @param {number} indentWidth The number of spaces to indent the output. Defaults to `2`.
+   * @returns The tree-like overview of all children.
+   */
+  nodeTree(indentWidth: number = 2): string {
+    return this.nodeTreeHeading() + this.nodeTreeChildren(indentWidth);
+  }
+
+  /**
+   * Gets the heading of the node tree.
+   * @returns The heading of the node tree.
+   */
+  protected abstract nodeTreeHeading(): string;
+
+  /**
+   * Gets the children of the node tree.
+   * @param indentWidth The number of spaces to indent the output.
+   * @returns The children of the node tree.
+   */
+  protected abstract nodeTreeChildren(indentWidth: number): string;
+}
+
+/**
+ * Indents a string.
+ * @param input The string to indent.
+ * @param indentWidth The number of spaces to indent the string.
+ * @param indentLevel The current level of indentation.
+ * @returns The indented string.
+ */
+function indentString(
+  input: string,
+  indentWidth: number,
+  indentLevel: number
+): string {
+  const lines = input.split("\n");
+  const indent = " ".repeat(indentWidth * indentLevel);
+  return lines.map((line) => indent + line).join("\n");
 }
 
 /**
@@ -96,10 +137,75 @@ export interface AttributeHolder {
   setAttribute(key: string, value: string): void;
 }
 
+export interface ValueHolder {
+  /**
+   * Stores the [simple parameterized value](https://www.bbcode.org/reference.php) of the tag.
+   *
+   * @example `[b=red]Hello World![/b]` -> `red`
+   */
+  value?: string;
+
+  /**
+   * Sets the value of the node.
+   *
+   * @param {string} value The value of the node.
+   * @deprecated Use {@link ValueHolder.value} instead.
+   */
+  setValue(value: string): void;
+}
+
+export abstract class ChildrenHolderNode
+  extends BaseNode
+  implements ChildrenHolder
+{
+  /**
+   * The children of the node.
+   *
+   * Ref: {@link ChildrenHolder.children}
+   */
+  public children: BaseNode[] = [];
+
+  addChild(child: BaseNode): void {
+    if (child instanceof TextNode) {
+      const previousChild = this.children[this.children.length - 1];
+      if (previousChild instanceof TextNode) {
+        // We flatten the text nodes.
+        previousChild.text += child.text;
+        return;
+      }
+    }
+
+    this.children.push(child.clone());
+  }
+
+  protected nodeTreeChildren(indentWidth: number): string {
+    if (this.children.length === 0) {
+      return ` {}`;
+    }
+
+    let nodeString = ` {`;
+    this.children.forEach((child) => {
+      const childOutput = `\n${indentString(
+        child.nodeTree(indentWidth),
+        indentWidth,
+        1
+      )}`;
+
+      nodeString += childOutput;
+    });
+    nodeString += "\n}";
+
+    return nodeString;
+  }
+}
+
 /**
  * A BBCode node. This represents a tag and it's children.
  */
-export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
+export class Node
+  extends ChildrenHolderNode
+  implements AttributeHolder, ValueHolder
+{
   /**
    * The name of the tag.
    *
@@ -115,16 +221,9 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
   public attributes: AttributeType;
 
   /**
-   * The children of the tag.
+   * The value of the tag.
    *
-   * Ref: {@link ChildrenHolder.children}
-   */
-  public children: BaseNode[] = [];
-
-  /**
-   * Stores the [simple parameterized value](https://www.bbcode.org/reference.php) of the tag.
-   *
-   * @example `[b=red]Hello World![/b]` -> `red`
+   * Ref: {@link ValueHolder.value}
    */
   value?: string;
 
@@ -145,25 +244,6 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
     return node;
   }
 
-  addChild(child: BaseNode): void {
-    if (child instanceof TextNode) {
-      const previousChild = this.children[this.children.length - 1];
-      if (previousChild instanceof TextNode) {
-        // We flatten the text nodes.
-        previousChild.text += child.text;
-        return;
-      }
-    }
-
-    this.children.push(child.clone());
-  }
-
-  /**
-   * Sets the value of the node.
-   *
-   * @param {string} value The value of the node.
-   * @deprecated Use {@link Node.value} instead.
-   */
   setValue(value: string): void {
     this.value = value;
   }
@@ -191,10 +271,28 @@ export class Node extends BaseNode implements ChildrenHolder, AttributeHolder {
 
   toString(): string {
     let nodeString = this.makeOpeningTag();
-    this.children.forEach((child) => {
-      nodeString += child.toString();
-    });
+    nodeString += this.children.map((child) => child.toString()).join("");
     nodeString += `[/${this.name}]`;
+    return nodeString;
+  }
+
+  protected nodeTreeHeading(): string {
+    let nodeString = `Node [${this.name}]`;
+    const allAttrs = [];
+    if (this.value) {
+      allAttrs.push(`${this.value}`);
+    }
+
+    if (Object.keys(this.attributes).length > 0) {
+      nodeString += ` (${allAttrs
+        .concat(
+          Object.entries(this.attributes).map(
+            ([key, value]) => `${key}=${value}`
+          )
+        )
+        .join(", ")})`;
+    }
+
     return nodeString;
   }
 }
@@ -226,12 +324,21 @@ export class TextNode extends BaseNode {
   toString(): string {
     return this.text;
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected nodeTreeHeading(): string {
+    return `TextNode`;
+  }
+
+  protected nodeTreeChildren(indentWidth: number): string {
+    return ` {\n${indentString(this.text, indentWidth, 1)}\n}`;
+  }
 }
 
 /**
  * The root node that represents the head of the AST. It only stores children.
  */
-export class RootNode extends BaseNode implements ChildrenHolder {
+export class RootNode extends ChildrenHolderNode {
   name = "RootNode";
 
   children: BaseNode[];
@@ -268,6 +375,11 @@ export class RootNode extends BaseNode implements ChildrenHolder {
   toString(): string {
     return this.children.map((child) => child.toString()).join("");
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected nodeTreeHeading(): string {
+    return `RootNode`;
+  }
 }
 
 /**
@@ -282,5 +394,10 @@ export class ListItemNode extends RootNode {
 
   clone(): ListItemNode {
     return new ListItemNode(this.children.map((child) => child.clone()));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected nodeTreeHeading(): string {
+    return `ListItemNode`;
   }
 }

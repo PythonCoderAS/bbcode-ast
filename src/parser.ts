@@ -48,6 +48,66 @@ export default class Parser {
    * @param text The chunk of BBCode to convert.
    * @returns The {@link RootNode} representing the BBCode.
    * @throws {Error} If the BBCode is not valid (missing a closing tag).
+   *
+   * @example Basic Example
+   * ```js
+   * const parsed = parser.parse("[b]Hello, world![/b]");
+   * console.log(parsed.toString()); // [b]Hello, world![/b]
+   * console.log(parsed.nodeTree());
+   *
+   * // RootNode {
+   * //   Node [b] {
+   * //     TextNode {
+   * //       Hello, world!
+   * //     }
+   * //   }
+   * // }
+   * ```
+   *
+   * @example Example with Attributes
+   * ```js
+   * const parsed = parser.parse("[b][i]Hi![/i][/b][img width=100 height=100]https://example.com/image.png[/img]");
+   * console.log(parsed.toString()); // [b][i]Hi![/i][/b][img width=100 height=100]https://example.com/image.png[/img]
+   * console.log(parsed.nodeTree());
+   *
+   * // RootNode {
+   * //   Node [b] {
+   * //     Node [i] {
+   * //       TextNode {
+   * //         Hi!
+   * //       }
+   * //     }
+   * //   }
+   * //   Node [img] (width=100, height=100) {
+   * //     TextNode {
+   * //       https://example.com/image.png
+   * //     }
+   * //   }
+   * // }
+   * ```
+   *
+   * @example Complex Example
+   * ```js
+   * const parsed = parser.parse('[size=50][quote=JohnDoe message=1]Hello, world![/quote][/size][img alt="World said hi!" width=100 height=100]https://example.com/image.png[/img]');
+   * console.log(parsed.toString()); // [size=50][quote=JohnDoe message=1]Hello, world![/quote][/size][img alt="World said hi!" width=100 height=100]https://example.com/image.png[/img]
+   * console.log(parsed.nodeTree());
+   *
+   * // RootNode {
+   * //   Node [size] {
+   * //     Node [quote] (JohnDoe, message=1) {
+   * //       TextNode {
+   * //         Hello, world!
+   * //       }
+   * //     }
+   * //   }
+   * //   Node [img] (alt="World said hi!", width=100, height=100) {
+   * //     TextNode {
+   * //       https://example.com/image.png
+   * //     }
+   * //   }
+   * // }
+   * ```
+   *
    */
   parse(text: string): RootNode {
     // Represents the node we will be returning.
